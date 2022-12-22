@@ -1,33 +1,28 @@
 <template>
-  <div>
-    {{ text }}
-  </div>
-  <textarea></textarea>
-  <ButtonUser @click="logii()" />
+  {{ text }}
+  <button @click="logii()" />
 </template>
 
 <script>
-import ButtonUser from "@/components/Secret/ButtonUser.vue";
-import axios from "axios";
-
 export default {
   data() {
     return {
       text: null,
     };
   },
-  components: {
-    ButtonUser,
+  watch: {
+    $route() {
+      this.text = this.$route.params;
+    },
   },
+  components: {},
   methods: {
-    logii() {},
+    logii() {
+      console.log(this.$route.params);
+    },
   },
   mounted() {
-    axios
-      .post(
-        "http://localhost:5763/api/crypto/dhashcontent/d9c66270-8199-11ed-a11d-31682c26c964"
-      )
-      .then((response) => (this.text = response.data.text));
+    this.text = this.$route.params;
   },
 };
 </script>
