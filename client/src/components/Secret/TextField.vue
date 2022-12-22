@@ -1,12 +1,21 @@
 <template>
+  <div>
+    {{ text }}
+  </div>
   <textarea></textarea>
   <ButtonUser @click="logii()" />
 </template>
 
 <script>
 import ButtonUser from "@/components/Secret/ButtonUser.vue";
+import axios from "axios";
 
 export default {
+  data() {
+    return {
+      text: null,
+    };
+  },
   components: {
     ButtonUser,
   },
@@ -14,6 +23,9 @@ export default {
     logii() {
       console.log("test");
     },
+  },
+  mounted() {
+    axios.post("").then((response) => (this.text = response.data.text));
   },
 };
 </script>

@@ -23,28 +23,17 @@ router.post('/hashcontent',
 
             const id = uuidv1();
 
-            // console.log(id);
+            const hashText = hashMsg(text);
+            const hashId = hashMsg(id);
+            //console.log(id);
 
             if (!error.isEmpty()) {
                 return res.status(400).json({message: 'Uncur req', error});
             }
 
-            const key = crypto.createHash('sha256').update(config.get('secretKey')).digest();
-            const cipherForText = crypto.createCipheriv('aes256', key, resizedIV);
-            const cipherForId = crypto.createCipheriv('aes256', key, resizedIV);
-
-            let hashText = [];
-            let hashId = [];
-
-            hashText = cipherForText.update(text, 'binary', 'hex')
-            hashText += cipherForText.final('hex');
-
-            hashId = cipherForId.update(id, 'binary', 'hex')
-            hashId += cipherForId.final('hex');
-
             const secret = new Secret({ _id:hashId, text:hashText });
             await secret.save();
-            return res.json({id: hashId, text:hashText});
+            return res.json({cId: id, id: hashId, text:hashText});
             // console.log(hashText.join(''));
 
         } catch (e) {
@@ -54,21 +43,22 @@ router.post('/hashcontent',
     },
 );
 
-router.post('/dhashcontent',
+router.post('/dhashcontent/:secretId',
     async (req, res) => {
         try {
-            const {secretId} = req.body;
-            const key = crypto.createHash('sha256').update(config.get('secretKey')).digest();
-            const decipher = crypto.createDecipheriv('aes256', key, resizedIV);
-            
-            let msg = [];
+            secretId = req.params.secretId;
 
-            msg += decipher.update(secretId, 'hex', 'binary');
+            console.log(secretId)
 
-            msg += decipher.final('binary');
-            console.log(msg);
-
-            res.send({message: 'Ok'});
+            Secret.findById(hashMsg(secretId), function (err, docs) {
+                if (err){
+                    console.log(err);
+                }
+                else{
+                    //console.log(docs.id, dHashMsg(docs.text), docs.date);
+                    return res.json({id: docs.id, text:dHashMsg(docs.text), date: docs.date});
+                }
+            });
 
         } catch (e) {
             console.log(e);
@@ -78,3 +68,30 @@ router.post('/dhashcontent',
 );
 
 module.exports = router;
+
+function hashMsg(string) {
+
+    const key = crypto.createHash('sha256').update(config.get('secretKey')).digest();
+    const cipher = crypto.createCipheriv('aes256', key, resizedIV);
+
+    let hashString = [];
+
+    hashString = cipher.update(string, 'binary', 'hex')
+    hashString += cipher.final('hex');
+
+    return hashString;
+}
+
+function dHashMsg(string) {
+            const key = crypto.createHash('sha256').update(config.get('secretKey')).digest();
+            const decipher = crypto.createDecipheriv('aes256', key, resizedIV);
+            
+            let dHashString = [];
+
+            dHashString += decipher.update(string, 'hex', 'binary');
+
+            dHashString += decipher.final('binary');
+            //console.log(msg); // msg dHashMsg
+
+            return dHashString;
+}

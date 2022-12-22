@@ -18,8 +18,8 @@ router.post('/private/:id',
     // ],
     async (req, res) => {
         try {
-let id = req.params.id
-return res.json({text: "ku", id: id});
+            let id = req.params.id;
+            return res.json({text: "ku", id: id});
         } catch (e) {
             console.log(e);
             res.send({message: 'Error'});

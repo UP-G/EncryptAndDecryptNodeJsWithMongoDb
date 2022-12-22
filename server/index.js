@@ -10,7 +10,6 @@ const PORT = config.get('serverPort');
 app.use(corsMiddleware);
 app.use(express.json());
 app.use('/api/crypto', hashMsgRouter);
-app.use('/api', privateRouter);
 
 const start = async () => {
   try {
