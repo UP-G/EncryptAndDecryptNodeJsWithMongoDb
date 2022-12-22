@@ -1,14 +1,39 @@
-// const crypto = require('crypto');
-// const config = require('config');
-// const argv = require('yargs').argv;
-// const resizedIV = Buffer.allocUnsafe(16);
-// const iv = crypto.createHash('sha256').update('myHashedIV').digest();
 
-// const key = crypto.createHash('sha256').update(config.get('secretKey')).digest();
-// const decipher = crypto.createDecipheriv('aes256', key, resizedIV);
-// let msg = []
-
-// msg += decipher.update(argv._, 'hex', 'binary');
-
-// msg += decipher.final('binary');
-// console.log(msg);
+let fs = require('fs');
+const {
+    scryptSync,
+    createDecipheriv,
+  } = require('node:crypto');
+  const { Buffer } = require('node:buffer');
+  
+  const algorithm = 'aes-192-cbc';
+  const password = 'Password used to generate key';
+  // Key length is dependent on the algorithm. In this case for aes192, it is
+  // 24 bytes (192 bits).
+  // Use the async `crypto.scrypt()` instead.
+  const key = scryptSync(password, 'salt', 24);
+  // The IV is usually passed along with the ciphertext.
+  const iv = Buffer.alloc(16, 0); // Initialization vector.
+  
+  const decipher = createDecipheriv(algorithm, key, iv);
+  
+  let decrypted = '';
+  
+  decipher.on('readable', () => {
+    let chunk;
+    while (null !== (chunk = decipher.read())) {
+      decrypted += chunk.toString('utf8');
+    }
+  });
+  decipher.on('end', () => {
+    console.log(decrypted);
+    // Prints: some clear text data
+  });
+  
+  // Encrypted with same algorithm, key and iv.
+  let fileContent = fs.readFileSync('kartinki24_ru_love_104.jpg', 'utf8');
+  return console.log(fileContent)
+  const encrypted =
+    'e5f79c5915c02171eec6b212d5520d44480993d7d622a7c4c2da32f6efda0ffa';
+  decipher.write(fileContent, 'hex');
+  decipher.end();
